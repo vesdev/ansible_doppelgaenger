@@ -14,7 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder '.', '/vagrant',
     disabled: true,
     id: "vagrant-root"
-  config.vm.box = "debian/wheezy64"
+  config.vm.box = "debian/buster64"
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbooks/site.yml"

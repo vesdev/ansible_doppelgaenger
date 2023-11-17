@@ -94,7 +94,7 @@ def define_vagrant_vms(vagrant_config)
     vagrant_config.vm.define hostname do |vm_config|
       vm_config.vm.hostname = hostname
       vm_config.vm.network "private_network", ip: config["ansible_ssh_host"]
-      configure_synced_folders(vm_config, hostname, config)
+      # configure_synced_folders(vm_config, hostname, config)
       if config.key?("vagrant_box")
         vm_config.vm.box = config["vagrant_box"]
       end
