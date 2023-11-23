@@ -3,6 +3,8 @@ hosts.base
 playbooks
 shared
 .vagrant
+.vagrant.d
+ansible.log
 group_vars
 host_vars
 .env

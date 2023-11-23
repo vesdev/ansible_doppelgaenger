@@ -5,6 +5,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+
+    # if old php versions are needed
+    # phps.url = "github:fossar/nix-phps";
   };
 
   outputs = inputs@{ flake-parts, nixpkgs, ... }:
@@ -24,9 +27,9 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
+
       perSystem = { pkgs, ... }:
         let
-
           pythonToolchain = pkgs.python311;
 
           pyPkgs = with pythonToolchain.pkgs;
@@ -58,6 +61,9 @@
                   resolvelib
                 ];
               })
+
+              #other py packages
+              six
             ];
 
             kifinix = pkgs.writeShellScriptBin "kifinix" ''
@@ -69,6 +75,7 @@
                   rm -f playbooks
                   rm -rf shared
                   rm -rf .vagrant
+                  rm -rf .vagrant.d
                 fi
 
                 if [[ "$1" == "init" ]]; then
@@ -95,17 +102,27 @@
                     ./inventory.rb --hosts
                 fi
 
-            '';
+                if [[ "$1" == "open" ]] then
+                  xdg-open "http://$(cat ip_mapping.json | jq -r \
+                    ".[\"''\${2%.local}\"].ansible_ssh_host")"
+                fi
 
+            '';
         in {
           devShells.default = pkgs.mkShell {
             packages = with pkgs;
               pyPkgs ++ [
                 kifinix
+                xdg-utils
+                jq
+
                 # other packages
                 ruby
                 vagrant
                 openssl
+                
+                ansible-language-server
+                rubyPackages.solargraph
 
                 # fix for vscode shell prompt escape characters
                 bashInteractive
@@ -114,24 +131,32 @@
             shellHook = ''
 
               # start ssh-agent locally in shell
-              eval $(ssh-agent) > /dev/null
+              eval $(ssh-agent -s)
 
               echo "
                 Welcome to kifinix shell!
-              
+            
                 Ensure you have a gitlab ssh key set up
                 if you already have it, it's usually located in '~/.ssh/...'
 
-                and export GITLAB_SSH_KEY=<path>
+                and export SSH_KEYS=<keys>
                 or you can put it in .env to make it persistent
               "
 
+              if ! type VBoxManage &> /dev/null; then
+                echo "
+                  No virtualbox installation detected
+                  Make sure it is installed
+                "
+              fi
+
               source .env
-              ssh-add $GITLAB_SSH_KEY
+              ssh-add $SSH_KEYS
 
               export PS1="\[\033[01;32m\][kifinix>''\\u@''\\h:''\\w]$\[\033[00m\] "
+              export VAGRANT_HOME="$PWD/.vagrant.d"
             '';
           };
         };
-    };
+  };
 }

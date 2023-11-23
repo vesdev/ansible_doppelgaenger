@@ -27,6 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ansible.force_remote_user = false
     ansible.extra_vars = {
       file_sync_no_controlhost: 'True',
+      # site_content_sync: 'True',
     }
   end
 end
