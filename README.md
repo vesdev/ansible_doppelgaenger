@@ -13,7 +13,7 @@ Usage
 -------------
 
 1. Install nix
-1. Run ``nix develop```
+1. Run ``nix develop``
 1. Then ``kifinix init``
 1. Configure ansible-vault password path (vault_password_file) in ansible.cfg.
 
