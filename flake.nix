@@ -5,21 +5,14 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    rust-overlay.url = "github:oxalica/rust-overlay";
 
     # if old php versions are needed
     # phps.url = "github:fossar/nix-phps";
   };
 
-  outputs = inputs@{ flake-parts, nixpkgs, ... }:
-    let
-      ansible-collections = [
-        "community.general"
-        "community.mysql"
-        "community.postgresql"
-        "community.docker"
-        "ansible.posix"
-      ];
-    in flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = inputs@{ flake-parts, nixpkgs, rust-overlay, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "i686-linux"
@@ -28,8 +21,14 @@
         "aarch64-darwin"
       ];
 
-      perSystem = { pkgs, ... }:
+      perSystem = { pkgs, system, ... }:
         let
+
+          pkgs = import nixpkgs {
+            inherit system;  
+            overlays = [(import rust-overlay)];
+          };
+          
           pythonToolchain = pkgs.python311;
 
           pyPkgs = with pythonToolchain.pkgs;
@@ -66,48 +65,15 @@
               six
             ];
 
-            kifinix = pkgs.writeShellScriptBin "kifinix" ''
-                if [[ "$1" == "clean" ]]; then 
-                  echo "Cleaning up..."
-                  vagrant destroy -f
-                  rm -f ip_mapping.json
-                  rm -f hosts.base
-                  rm -f playbooks
-                  rm -rf shared
-                  rm -rf .vagrant
-                  rm -rf .vagrant.d
-                fi
+          rustToolchain = pkgs.rust-bin.nightly.latest.default;
+          kifinix = pkgs.substituteAll {
+            src = ./kifinix.rs;
+            name = "kifinix";
+            dir = "/bin";
 
-                if [[ "$1" == "init" ]]; then
-                  echo "Enter playbooks directory!"
+            isExecutable = true;
+          };
 
-                  playbooks_dir= 
-                  while true ; do
-                    read -r -p "Path: " playbooks_dir
-                    if [ -d "$playbooks_dir" ] ; then
-                      break
-                    fi
-                    echo "$playbooks_dir is not a directory!"
-                  done
-
-                  ln -s $playbooks_dir playbooks
-                  ./inventory.rb --hosts
-
-                  ansible-galaxy collection install ${
-                    pkgs.lib.concatStringsSep " " ansible-collections
-                  }
-                fi
-
-                if [[ "$1" == "hosts" ]] then              
-                    ./inventory.rb --hosts
-                fi
-
-                if [[ "$1" == "open" ]] then
-                  xdg-open "http://$(cat ip_mapping.json | jq -r \
-                    ".[\"''\${2%.local}\"].ansible_ssh_host")"
-                fi
-
-            '';
         in {
           devShells.default = pkgs.mkShell {
             packages = with pkgs;
@@ -120,6 +86,16 @@
                 ruby
                 vagrant
                 openssl
+
+                # NOTE: rust-analyzer doesnt work on cargo scripts for now 
+                (rustToolchain.override { extensions = [
+                  "cargo"
+                  "clippy"
+                  "rust-src"
+                  "rust-analyzer"
+                  "rustc"
+                  "rustfmt"
+                ];})
                 
                 ansible-language-server
                 rubyPackages.solargraph

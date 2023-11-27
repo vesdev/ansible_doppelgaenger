@@ -2,7 +2,7 @@
 
 ## makupalat:
   - [x] nagios fails on java error about cacerts
-  - [ ] nginx 403 
+  - [x] nginx 403 
 
 ## kirjastot.fi:
   - elastic search oss-5.x/apt stable Release 

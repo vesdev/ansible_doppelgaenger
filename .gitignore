@@ -8,3 +8,4 @@ ansible.log
 group_vars
 host_vars
 .env
+/target

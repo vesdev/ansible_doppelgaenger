@@ -40,7 +40,7 @@ def set_hostnames(inventory)
   inventory.each do |key, value|
     if value.key?("hosts") && value["hosts"] != []
       hosts = []
-      value["hosts"].each do |host|
+      value["hosts"].each do |host|host
         hosts.push(host + ".local")
       end
       inventory[key]["hosts"] = hosts
