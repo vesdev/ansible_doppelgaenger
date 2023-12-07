@@ -115,8 +115,8 @@
                 Ensure you have a gitlab ssh key set up
                 if you already have it, it's usually located in '~/.ssh/...'
 
-                and export SSH_KEYS=<keys>
-                or you can put it in .env to make it persistent
+                then;
+                echo "ssh-add <path>" >> keys.sh
               "
 
               if ! type VBoxManage &> /dev/null; then
@@ -126,11 +126,10 @@
                 "
               fi
 
-              source .env
-              ssh-add $SSH_KEYS
+              export VAGRANT_HOME="$PWD/.vagrant.d"
+              source ./keys.sh
 
               export PS1="\[\033[01;32m\][kifinix>''\\u@''\\h:''\\w]$\[\033[00m\] "
-              export VAGRANT_HOME="$PWD/.vagrant.d"
             '';
           };
         };

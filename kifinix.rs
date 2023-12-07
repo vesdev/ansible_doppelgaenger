@@ -23,7 +23,6 @@ struct Kifinix {
 enum Command {
     Clean(Clean),
     Init(Init),
-    Inventory(Inventory),
 }
 
 /// Clean up the project
@@ -40,13 +39,6 @@ struct Init {
     playbooks_path: PathBuf,
 }
 
-//TODO:
-/// Ansible inventory
-/// Could possibly replace inventory.rb 
-#[derive(FromArgs)]
-#[argh(subcommand, name = "inventory")]
-pub struct Inventory {}
-
 fn main() -> anyhow::Result<()> {
     let kicli: Kifinix = argh::from_env();
 
@@ -55,6 +47,9 @@ fn main() -> anyhow::Result<()> {
         Command::Clean(_) => {
             cmd!(sh, "echo Cleaning up...").run()?;
             cmd!(sh, "vagrant destroy -f").quiet().run()?;
+            // NOTE: only use rm incase playbooks is a directory
+            // instead of a symlink, so it wont remove the directory
+            cmd!(sh, "rm playbooks").quiet().run()?;
             cmd!(sh, "rm -f ip_mapping.json").quiet().run()?;
             cmd!(sh, "rm -f hosts.base").quiet().run()?;
             cmd!(sh, "rm -rf shared").quiet().run()?;
@@ -79,12 +74,11 @@ fn main() -> anyhow::Result<()> {
             .run()?;
 
             for collection in ansible_collections {
-                cmd!(sh, "ansible-galaxy collection install {collection}").run()?;
+                cmd!(sh, "ansible-galaxy collection install {collection} --force").run()?;
             }
 
             cmd!(sh, "./inventory.rb --hosts").run()?;
             Ok(())
         }
-        Command::Inventory(_) => Ok(()),
     }
 }
