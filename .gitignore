@@ -1,11 +1,3 @@
-ip_mapping.json
-hosts.base
-playbooks
-shared
-.vagrant
-.vagrant.d
-ansible.log
-group_vars
-host_vars
-.env
-/target
+.kifinix/profiles/*
+keys.sh
+env

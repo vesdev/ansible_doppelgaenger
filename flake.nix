@@ -1,13 +1,7 @@
 {
-  # virtualbox is not included in the flake
-  # this needs to be installed on your system
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-
-    # if old php versions are needed
-    # phps.url = "github:fossar/nix-phps";
   };
 
   outputs = inputs@{ flake-parts, nixpkgs, ... }:
@@ -58,23 +52,18 @@
             python-lsp-server
           ];
 
-          rustToolchain = pkgs.rust-bin.nightly.latest.default;
-          kifinix = pkgs.substituteAll {
-            src = ./kifinix.py;
-            name = "kifinix";
-            dir = "/bin";
-
-            isExecutable = true;
-          };
         in {
           devShells.default = pkgs.mkShell {
             packages = with pkgs;
               pyPkgs ++ [
-                kifinix
-                xdg-utils
-                jq
+                (pkgs.substituteAll {
+                  src = ./kifinix.py;
+                  name = "kifinix";
+                  dir = "/bin";
 
-                # other packages
+                  isExecutable = true;
+                })
+
                 ruby
                 vagrant
                 openssl
@@ -100,9 +89,9 @@
                 "
               fi
 
-              export VAGRANT_HOME="$PWD/.vagrant.d"
+              export KIFINIX_ROOT=$PWD
+              export VAGRANT_HOME="$KIFINIX_ROOT/env/.vagrant.d"
               export PS1="\[\033[01;32m\][kifinix>\u@\h:\w]$\[\033[00m\] "
-
             '';
           };
         };

@@ -10,6 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   define_vagrant_vms config
   config.ssh.forward_agent = true
   config.ssh.insert_key = false
+  # config.ssh.keys_only = false
   # Disable /vagrant folder syncing, it takes a lot of space on vm.
   config.vm.synced_folder '.', '/vagrant',
     disabled: true,
