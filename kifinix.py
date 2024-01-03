@@ -52,6 +52,10 @@ match args.command:
         os.system(f"./inventory.rb --hosts")
 
     case "switch":
+        os.chdir(f"{kifinix_root}/env")
+        os.system("vagrant halt")
+
+        os.chdir(kifinix_root)
         profile_path = f"{kifinix_root}/.kifinix/profiles/{args.name}"
         os.system(f"rm -f {kifinix_root}/env")
         os.system(f"ln -s {profile_path} {kifinix_root}/env")

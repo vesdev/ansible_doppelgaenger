@@ -15,65 +15,35 @@
       ];
 
       perSystem = { pkgs, system, ... }:
-        let
-          pythonToolchain = pkgs.python311;
-
-          pyPkgs = with pythonToolchain.pkgs; [
-
-            # ansible 2.11 stable
-            (pythonToolchain.pkgs.buildPythonPackage rec {
-              pname = "ansible";
-              version = "0.2.11";
-              format = "setuptools";
-
-              src = pkgs.fetchFromGitHub {
-                owner = pname;
-                repo = pname;
-                rev = "05f919e21c724fe1bf490f4e8a4a450ebea92c8b";
-                hash = "sha256-qcpul7gTqKPq4ZGtsuUQtm/2MGKaMKaXomB81kvsrd8=";
-              };
-
-              dontStrip = true;
-              doCheck = false;
-
-              # from: https://github.com/ansible/ansible/blob/stable-2.11/requirements.txt
-              propagatedBuildInputs = with pythonToolchain.pkgs; [
-                jinja2
-                pyyaml
-                cryptography
-                packaging
-                setuptools
-                resolvelib
-              ];
-            })
-
-            #other py packages
-            six
-            python-lsp-server
-          ];
-
+        let python = pkgs.python311;
         in {
           devShells.default = pkgs.mkShell {
-            packages = with pkgs;
-              pyPkgs ++ [
-                (pkgs.substituteAll {
-                  src = ./kifinix.py;
-                  name = "kifinix";
-                  dir = "/bin";
+            packages = with pkgs; [
+              ((import ./ansible.nix { inherit pkgs python; })."2.11.12")
 
-                  isExecutable = true;
-                })
+              (pkgs.substituteAll {
+                src = ./kifinix.py;
+                name = "kifinix";
+                dir = "/bin";
 
-                ruby
-                vagrant
-                openssl
+                isExecutable = true;
+              })
 
-                ansible-language-server
-                rubyPackages.solargraph
+              #other py packages
+              python.pkgs.six
+              python.pkgs.python-lsp-server
 
-                # fix for vscode shell prompt escape characters
-                bashInteractive
-              ];
+              # packages
+              ruby
+              vagrant
+              openssl
+
+              ansible-language-server
+              rubyPackages.solargraph
+
+              # fix for vscode shell prompt escape characters
+              bashInteractive
+            ];
 
             shellHook = ''
 
