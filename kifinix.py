@@ -24,6 +24,8 @@ switch.add_argument("name")
 delete = command.add_parser("delete")
 delete.add_argument("name")
 
+update_hosts = command.add_parser("update-hosts")
+
 collections = [
     "community.general",
     "community.mysql",
@@ -122,6 +124,11 @@ match args.command:
         for collection in collections:
             os.system(f"ansible-galaxy collection install {collection} -p . --force")
 
+        os.system(f"{kifinix_root}/inventory.rb --hosts")
+
+    case "update-hosts":
+        profile_path = f"{kifinix_root}/env/"
+        os.chdir(profile_path)
         os.system(f"{kifinix_root}/inventory.rb --hosts")
 
     case "switch":
