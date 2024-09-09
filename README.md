@@ -7,9 +7,6 @@ Fork of [ansible_doppelgaenger](https://github.com/libraries-fi/ansible_doppelga
 Kifi specific nix development environment for vagrant vms.
 Provides all packages necessary for developing and running local services (aside from virtualbox).
 
-Defined IPs that can also be written to /etc/hosts if needed. Requires the ansible inventory to be
-in YAML format.
-
 Usage
 -------------
 
