@@ -24,7 +24,7 @@ Usage
   You probably want --legacy if you're planning to use older debian versions.
   (you can create multiple profiles)
 5. switch to the profile you created with ``kifinix switch <name>``
-6. your active profile will be in env/ so just cd into it 
+6. your active profile will be in ./env/ so just cd into it 
 7. Configure ansible-vault password path (vault_password_file) in ansible.cfg.
   TODO: kifinix.py could also be made to do this
 
